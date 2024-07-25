@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Form</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .form-label {
+            font-weight: bold;
+        }
+        .btn-primary, .btn-secondary {
+            margin-right: 0.5rem;
+        }
+        .form-text {
+            font-size: 0.875rem;
+        }
+        .form-control:focus {
+            box-shadow: none;
+            border-color: #007bff;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <h2 class="mb-4">Employee Form</h2>
+    <form id="empForm">
+        <div class="mb-3">
+            <label for="empId" class="form-label">Employee ID:</label>
+            <input type="text" class="form-control" id="empId" placeholder="Enter Employee ID" required>
+            <div id="empIdError" class="form-text text-danger"></div>
+        </div>
+        <div class="mb-3">
+            <label for="empName" class="form-label">Employee Name:</label>
+            <input type="text" class="form-control" id="empName" placeholder="Enter Employee Name" disabled>
+            <div id="empNameError" class="form-text text-danger"></div>
+        </div>
+        <div class="mb-3">
+            <label for="empSalary" class="form-label">Salary:</label>
+            <input type="number" class="form-control" id="empSalary" placeholder="Enter Salary" disabled>
+            <div id="empSalaryError" class="form-text text-danger"></div>
+        </div>
+        <div class="mb-3">
+            <label for="empHra" class="form-label">HRA:</label>
+            <input type="number" class="form-control" id="empHra" placeholder="Enter HRA" disabled>
+            <div id="empHraError" class="form-text text-danger"></div>
+        </div>
+        <div class="mb-3">
+            <label for="empDa" class="form-label">DA:</label>
+            <input type="number" class="form-control" id="empDa" placeholder="Enter DA" disabled>
+            <div id="empDaError" class="form-text text-danger"></div>
+        </div>
+        <div class="mb-3">
+            <label for="empDeduction" class="form-label">Deduction:</label>
+            <input type="number" class="form-control" id="empDeduction" placeholder="Enter Deduction" disabled>
+            <div id="empDeductionError" class="form-text text-danger"></div>
+        </div>
+        <button type="button" class="btn btn-primary" id="saveBtn" disabled>Save</button>
+        <button type="button" class="btn btn-secondary" id="changeBtn" disabled>Change</button>
+        <button type="button" class="btn btn-secondary" id="resetBtn">Reset</button>
+    </form>
+</div>
+<script>
+$(document).ready(function () {
+    function resetForm() {
+        $('#empId').val('');
+        $('#empName').val('');
+        $('#empSalary').val('');
+        $('#empHra').val('');
+        $('#empDa').val('');
+        $('#empDeduction').val('');
+        $('#empId').focus();
+        $('#empName, #empSalary, #empHra, #empDa, #empDeduction').prop('disabled', true);
+        $('#saveBtn, #changeBtn').prop('disabled', true);
+        $('#resetBtn').prop('disabled', false);
+    }
+
+    async function validateForm() {
+        let valid = true;
+        const empId = $('#empId').val().trim();
+        const empName = $('#empName').val().trim();
+        const empSalary = $('#empSalary').val().trim();
+        const empHra = $('#empHra').val().trim();
+        const empDa = $('#empDa').val().trim();
+        const empDeduction = $('#empDeduction').val().trim();
+
+        $('.form-text').text('');
+
+        if (!empId) {
+            $('#empIdError').text('Employee ID is required.');
+            valid = false;
+        }
+        if (!empName) {
+            $('#empNameError').text('Employee Name is required.');
+            valid = false;
+        }
+        if (!empSalary) {
+            $('#empSalaryError').text('Salary is required.');
+            valid = false;
+        }
+        if (!empHra) {
+            $('#empHraError').text('HRA is required.');
+            valid = false;
+        }
+        if (!empDa) {
+            $('#empDaError').text('DA is required.');
+            valid = false;
+        }
+        if (!empDeduction) {
+            $('#empDeductionError').text('Deduction is required.');
+            valid = false;
+        }
+
+        return valid;
+    }
+
+    async function checkIdExists(empId) {
+        try {
+            const response = await $.get(`http://api.example.com/checkId?id=${empId}`);
+            console.log('ID Check Response:', response);
+            return response.exists;
+        } catch (error) {
+            console.error('Error checking ID existence:', error);
+            return false;
+        }
+    }
+
+    async function saveEmployee() {
+        const empId = $('#empId').val().trim();
+        const empName = $('#empName').val().trim();
+        const empSalary = $('#empSalary').val().trim();
+        const empHra = $('#empHra').val().trim();
+        const empDa = $('#empDa').val().trim();
+        const empDeduction = $('#empDeduction').val().trim();
+
+        const data = JSON.stringify({ id: empId, name: empName, salary: empSalary, hra: empHra, da: empDa, deduction: empDeduction });
+        try {
+            await $.post('http://api.example.com/save', data);
+            alert('Employee data saved successfully!');
+        } catch (error) {
+            console.error('Error saving employee data:', error);
+        }
+    }
+
+    async function updateEmployee() {
+        const empId = $('#empId').val().trim();
+        const empName = $('#empName').val().trim();
+        const empSalary = $('#empSalary').val().trim();
+        const empHra = $('#empHra').val().trim();
+        const empDa = $('#empDa').val().trim();
+        const empDeduction = $('#empDeduction').val().trim();
+
+        const data = JSON.stringify({ name: empName, salary: empSalary, hra: empHra, da: empDa, deduction: empDeduction });
+        try {
+            await $.post(`http://api.example.com/update?id=${empId}`, data);
+            alert('Employee data updated successfully!');
+        } catch (error) {
+            console.error('Error updating employee data:', error);
+        }
+    }
+
+    $('#empId').on('blur', async function () {
+        const empId = $(this).val().trim();
+        if (empId) {
+            const exists = await checkIdExists(empId);
+            if (exists) {
+                $('#empName').prop('disabled', false);
+                $('#empSalary').prop('disabled', false);
+                $('#empHra').prop('disabled', false);
+                $('#empDa').prop('disabled', false);
+                $('#empDeduction').prop('disabled', false);
+                $('#saveBtn').prop('disabled', true);
+                $('#changeBtn').prop('disabled', false);
+                $('#resetBtn').prop('disabled', false);
+                $('#empName').focus();
+            } else {
+                $('#empName').prop('disabled', false);
+                $('#empSalary').prop('disabled', false);
+                $('#empHra').prop('disabled', false);
+                $('#empDa').prop('disabled', false);
+                $('#empDeduction').prop('disabled')
+            }
+        }
+    }
+)
+}
+)

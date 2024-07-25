@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Styled Employee Form</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .form-label {
+            font-weight: bold;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+        }
+        .btn-primary:disabled {
+            background-color: #c0c0c0;
+            border-color: #c0c0c0;  
+        }
+        .form-text {
+            font-size: 0.875rem;
+        }
+        .form-control:focus {
+            box-shadow: none;
+            border-color: #007bff;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <h2 class="mb-4">Employee Form</h2>
+    <form id="empForm">
+        <div class="mb-3">
+            <label for="empId" class="form-label">Employee ID:</label>
+            <input type="text" class="form-control" id="empId" placeholder="Enter Employee ID" required>
+            <div id="empIdError" class="form-text text-danger"></div>
+        </div>
+        <div class="mb-3">
+            <label for="empName" class="form-label">Employee Name:</label>
+            <input type="text" class="form-control" id="empName" placeholder="Enter Employee Name" required>
+            <div id="empNameError" class="form-text text-danger"></div>
+        </div>
+        <div class="mb-3">
+            <label for="empEmail" class="form-label">Email:</label>
+            <input type="email" class="form-control" id="empEmail" placeholder="Enter Employee Email" required>
+            <div id="empEmailError" class="form-text text-danger"></div>
+        </div>
+        <button type="button" class="btn btn-primary" id="empSave">Save</button>
+    </form>
+</div>
+<script>
+$(document).ready(function () {
+    $("#empId").focus();
+
+    async function validateAndGetFormData() {
+        let valid = true;
+        const empId = $("#empId").val().trim();
+        const empName = $("#empName").val().trim();
+        const empEmail = $("#empEmail").val().trim();
+
+        $("#empIdError").text("");
+        $("#empNameError").text("");
+        $("#empEmailError").text("");
+
+        if (!empId) {
+            $("#empIdError").text("Employee ID is required.");
+            valid = false;
+        }
+        if (!empName) {
+            $("#empNameError").text("Employee Name is required.");
+            valid = false;
+        }
+        if (!empEmail) {
+            $("#empEmailError").text("Employee Email is required.");
+            valid = false;
+        }
+
+        if (!valid) {
+            return null;
+        }
+
+        return JSON.stringify({ empId, empName, empEmail });
+    }
+
+    function createPUTRequest(connToken, jsonObj, dbName, relName) {
+        return JSON.stringify({
+            token: connToken,
+            dbName,
+            cmd: "PUT",
+            rel: relName,
+            jsonStr: jsonObj
+        }, null, 2);
+    }
+
+    async function executeCommand(reqString, dbBaseUrl, apiEndPointUrl) {
+        const url = `${dbBaseUrl}${apiEndPointUrl}`;
+        try {
+            const response = await $.post(url, reqString);
+            return JSON.parse(response);
+        } catch (error) {
+            console.error("Error executing command:", error);
+            return null;
+        }
+    }
+
+    function resetForm() {
+        $("#empId").val("");
+        $("#empName").val("");
+        $("#empEmail").val("");
+        $("#empId").focus();
+    }
+
+    $("#empSave").click(async function () {
+        const jsonStr = await validateAndGetFormData();
+        if (!jsonStr) {
+            return;
+        }
+
+        const putReqStr = createPUTRequest("90936861|-31948784479254024|90932362", jsonStr, "SAMPLE", "EMP-REL");
+        alert(putReqStr);
+
+        const resultObj = await executeCommand(putReqStr, "http://api.login2explore.com:5577", "/api/iml");
+        if (resultObj) {
+            alert(JSON.stringify(resultObj));
+        } else {
+            alert("Failed to save employee data.");
+        }
+
+        resetForm();
+    });
+});
+</script>
+</body>
+</html>
